@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, {{ teacher.fullname }}</h1>
+    <h2>Your Classes:</h2>
+    <ul>
+        {% for class in classes %}
+            <li>{{ class.classname }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Your Students:</h2>
+    <ul>
+        {% for student in students %}
+            <li>{{ student.fullname }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Grades:</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Subject</th>
+                <th>Grade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grade in grades %}
+                <tr>
+                    <td>{{ grade.student.fullname }}</td>
+                    <td>{{ grade.subject.subjectname }}</td>
+                    <td>{{ grade.grade }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
