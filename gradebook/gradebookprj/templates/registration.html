@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup new user</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 5px;
+        }
+        .form-group label {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .form-control {
+            width: 100%;
+            height: 38px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #007bff;
+            border: 1px solid #007bff;
+            color: #fff;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .valid-input {
+            background-color: #c3e6cb !important; /* Зеленый цвет при совпадении паролей */
+        }
+        .invalid-input {
+            background-color: #f5c6cb !important; /* Красный цвет при несовпадении паролей */
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <button type="button" class="btn btn-secondary back-button" onclick="goBack()">Back</button>
+    <div class="container">
+        <h2 class="text-center mb-4">Signup new user</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_role">Role:</label>
+                <select id="id_role" name="role" class="form-control" required onchange="showAdditionalFields()">
+                    <option value="teacher">Teacher</option>
+                    <option value="student">Student</option>
+                    <option value="admin">Admin</option>
+                    <option value="parent">Parent</option>
+                </select>
+            </div>
+            <div id="teacher-form" class="role-form">
+                <label for="id_full_name">Full Name:</label>
+                <input type="text" id="full_name" name="full_name" class="form-control">
+                <label for="id_subject">Subject:</label>
+                <select id="id_subject" name="subject" class="form-control">
+                    <!-- Здесь можно добавить опции для предметов -->
+                </select>
+                <label for="id_phone_number">Phone Number:</label>
+                <input type="number" id="phone_number" name="phone_number" class="form-control">
+                <label for="id_email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control">
+            </div>
+            <div id="student-form" class="role-form">
+                <label for="id_full_name">Full Name:</label>
+                <input type="text" id="full_name" name="full_name" class="form-control">
+                <label for="class_id">Class:</label>
+                <select id="class_id" name="class_id" class="form-control">
+                    <!-- Опции для классов будут добавлены динамически через JavaScript -->
+                </select>
+                <label for="birth_date">Birth Date:</label>
+                <input type="date" id="birth_date" name="birth_date" class="form-control">
+                <label for="phone_number">Phone Number:</label>
+                <input type="number" id="phone_number" name="phone_number" class="form-control">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control">
+                <label for="parent_id">Parent:</label>
+                <select id="parent_id" name="parent_id" class="form-control">
+                    <!-- Опции для родителей будут добавлены динамически через JavaScript -->
+                </select>
+            </div>
+            <div id="parent-form" class="role-form">
+                <label for="full_name">Full Name:</label>
+                <input type="text" id="full_name" name="full_name" class="form-control">
+                <label for="phone_number">Phone Number:</label>
+                <input type="number" id="phone_number" name="phone_number" class="form-control">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="id_username">Username:</label>
+                <input type="text" id="id_username" name="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="id_password">Password:</label>
+                <input type="password" id="id_password" name="password" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="id_confirm_password">Confirm password:</label>
+                <input type="password" id="id_confirm_password" name="confirm_password" class="form-control" required>
+                <small id="passwordMatchMessage" class="form-text text-danger"></small>
+            </div>
+            <button type="submit" class="btn btn-primary">Signup</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    var passwordInput = document.getElementById("id_password");
+    var confirmPasswordInput = document.getElementById("id_confirm_password");
+
+    confirmPasswordInput.addEventListener("input", function() {
+        if (confirmPasswordInput.value === passwordInput.value) {
+            confirmPasswordInput.classList.remove("invalid-input");
+            confirmPasswordInput.classList.add("valid-input");
+            passwordInput.classList.remove("invalid-input");
+            passwordInput.classList.add("valid-input");
+        } else {
+            confirmPasswordInput.classList.remove("valid-input");
+            confirmPasswordInput.classList.add("invalid-input");
+            passwordInput.classList.remove("valid-input");
+            passwordInput.classList.add("invalid-input");
+        }
+    });
+
+    $(document).ready(function(){
+        $('#id_role').change(function(){
+            var role = $(this).val();
+            $('.role-form').hide(); // Hide all role forms
+            $('#' + role + '-form').show(); // Show selected role form
+
+                // Disable inputs not related to the current role
+            $('.role-form').find(':input').prop('disabled', true);
+            $('#' + role + '-form').find(':input').prop('disabled', false);
+        });
+    });
+
+    function showAdditionalFields() {
+        var roleSelect = document.getElementById("id_role");
+        var teacherFieldsDiv = document.getElementById("teacher-form");
+        var studentFieldsDiv = document.getElementById("student-form");
+        var parentFieldsDiv = document.getElementById("parent-form");
+
+        if (roleSelect.value === "teacher") {
+            teacherFieldsDiv.style.display = "block";
+            studentFieldsDiv.style.display = "none";
+            parentFieldsDiv.style.display = "none";
+            loadSubjects(); // Загружаем список предметов при выборе роли учителя
+         } else if (roleSelect.value === "student") {
+            teacherFieldsDiv.style.display = "none";
+            studentFieldsDiv.style.display = "block";
+            parentFieldsDiv.style.display = "none";
+            loadClasses(); // Загружаем список классов при выборе роли студента
+            loadParents(); // Загружаем список родителей при выборе роли студента
+        } else if (roleSelect.value === "parent") {
+            teacherFieldsDiv.style.display = "none";
+            studentFieldsDiv.style.display = "none";
+            parentFieldsDiv.style.display = "block";
+        } else {
+            teacherFieldsDiv.style.display = "none";
+            studentFieldsDiv.style.display = "none";
+            parentFieldsDiv.style.display = "none";
+        }
+    }
+
+    function loadClasses() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/get_classes/', true);
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                var data = JSON.parse(xhr.responseText);
+                var classSelect = document.getElementById("class_id");
+                classSelect.innerHTML = ''; // Очищаем текущие опции
+
+                data.classes.forEach(function(cls) {
+                    var option = document.createElement("option");
+                    option.value = cls.id;
+                    option.text = cls.name;
+                    classSelect.appendChild(option);
+                });
+            }
+        };
+
+        xhr.send();
+    }
+
+    function loadParents() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/get_parents/', true);
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                var data = JSON.parse(xhr.responseText);
+                var parentSelect = document.getElementById("parent_id");
+                parentSelect.innerHTML = ''; // Очищаем текущие опции
+
+                data.parents.forEach(function(parent) {
+                        var option = document.createElement("option");
+                        option.value = parent.id;
+                        option.text = parent.name;
+                        parentSelect.appendChild(option);
+                    });
+                }
+            };
+
+            xhr.send();
+        }
+
+        function loadSubjects() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/get_subjects/', true);
+
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 400) {
+                    var data = JSON.parse(xhr.responseText);
+                    var subjectSelect = document.getElementById("id_subject");
+                    subjectSelect.innerHTML = ''; // Очищаем текущие опции
+
+                    data.subjects.forEach(function(subject) {
+                        var option = document.createElement("option");
+                        option.value = subject.id;
+                        option.text = subject.name;
+                        subjectSelect.appendChild(option);
+                    });
+                }
+            };
+
+            xhr.send();
+        }
+        
+        // Вызов функции при загрузке страницы, чтобы правильно отобразить поля при первоначальном выборе роли
+        showAdditionalFields();
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
+    

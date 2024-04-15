@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schedule</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #555;
+            color: #fff;
+        }
+        td a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .back-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+        th:not(:first-child),
+        td:not(:first-child) {
+            border-left: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Schedule</h1>
+        <button class="back-button" onclick="goBack()">Back</button>
+    </div>
+    <table>
+        <tr>
+            <th>Class</th>
+            {% for weekday in weekdays %}
+                <th>{{ weekday.name }}</th>
+            {% endfor %}
+        </tr>
+        {% for class_obj in classes %}
+            <tr>
+                <td>{{ class_obj.class_name }}</td>
+                {% for weekday, schedule_items in schedule_data %}
+                    <td>
+                        {% for schedule_item in schedule_items %}
+                            {% if schedule_item.class_id == class_obj and schedule_item.day_of_week == weekday %}
+                                {{ schedule_item.subject_id }}
+                                <a href="{% url 'rate' subject_id=schedule_item.subject_id.pk class_id=schedule_item.class_id.pk %}">Rate</a><br>
+                            {% endif %}
+                        {% empty %}
+                            <!-- No schedule -->
+                        {% endfor %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

@@ -1,16 +1,15 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
-    ROLE_CHOICES = (
-        ('teacher', 'Teacher'),
-        ('student', 'Student'),
-        ('admin', 'Admin'),
-        ('parent', 'Parent'),
-    )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    is_admin = models.BooleanField('Is admin', default=False)
+    is_teacher = models.BooleanField('Is teacher', default=False)
+    is_student = models.BooleanField('Is student', default=False)
+    is_parent = models.BooleanField('Is parent', default=False)
 
-class Classes(models.Model):
+
+
+class Class(models.Model):
     class_id = models.AutoField(primary_key=True)
     class_name = models.CharField(max_length=255)
 
@@ -25,7 +24,6 @@ class Subject(models.Model):
         return self.subject_name
 
 class Teacher(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='teacher', null=True)
     teacher_id = models.AutoField(primary_key=True)
     full_name = models.CharField(max_length=255)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
@@ -36,7 +34,6 @@ class Teacher(models.Model):
         return self.full_name
 
 class Parent(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='parent', null=True)
     parent_id = models.AutoField(primary_key=True)
     full_name = models.CharField(max_length=255)
     phone_number = models.IntegerField()
@@ -46,10 +43,9 @@ class Parent(models.Model):
         return self.full_name
 
 class Student(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='student', null=True)
     student_id = models.AutoField(primary_key=True)
     full_name = models.CharField(max_length=255)
-    class_id = models.ForeignKey(Classes, on_delete=models.CASCADE)
+    class_id = models.ForeignKey(Class, on_delete=models.CASCADE)
     birth_date = models.DateField()
     phone_number = models.IntegerField()
     email = models.EmailField()
@@ -60,26 +56,45 @@ class Student(models.Model):
 
 class Grade(models.Model):
     grade = models.IntegerField()
-    date = models.DateField()
     subject_id = models.ForeignKey(Subject, on_delete=models.CASCADE)
     student_id = models.ForeignKey(Student, on_delete=models.CASCADE)
 
-
-    def __str__(self):
-        return f"{self.student_id.full_name} - {self.subject_id.subject_name} - Grade: {self.grade} - Date: {self.date}"
-    
-class Weekday(models.Model):
-    name = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.name
-
 class Schedule(models.Model):
     schedule_id = models.AutoField(primary_key=True)
-    subject_id = models.ForeignKey('Subject', on_delete=models.CASCADE)
-    class_id = models.ForeignKey('Classes', on_delete=models.CASCADE)
-    teacher_id = models.ForeignKey('Teacher', on_delete=models.CASCADE)
-    day_of_week = models.ForeignKey(Weekday, on_delete=models.CASCADE)
+    subject_id = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    class_id = models.ForeignKey(Class, on_delete=models.CASCADE)
+    teacher_id = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    date = models.DateField()
 
     def __str__(self):
-        return f"{self.subject_id} - {self.class_id} - {self.teacher_id} - {self.day_of_week}"
+        return f"{self.subject_id} - {self.class_id} - {self.teacher_id} - {self.date}"
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rate Subject</title>
+</head>
+<body>
+    <h1>Rate Subject: {{ subject.subject_name }}</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="student">Select Student:</label>
+        <select name="student_id" id="student">
+            {% for student in students %}
+                <option value="{{ student.id }}">{{ student.full_name }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date">
+        <br>
+        <label for="grade">Grade:</label>
+        <input type="number" id="grade" name="grade" min="1" max="5">
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

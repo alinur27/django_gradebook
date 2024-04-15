@@ -1,4 +1,4 @@
 from django.contrib import admin
 from .models import *
 
-admin.site.register([Class, Parent, Teacher, Student, Schedule, Grade, Subject])
+admin.site.register([CustomUser, Classes, Subject, Teacher, Parent, Student, Grade, Schedule, Weekday])
